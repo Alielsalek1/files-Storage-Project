@@ -3,6 +3,8 @@ project(Files_ass)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Files_ass main.cpp
-        Doctor.cpp
-        Appointment.cpp)
+add_executable(Files_ass
+        main.cpp
+        utils.h
+        Appointment.h
+        Doctor.h)

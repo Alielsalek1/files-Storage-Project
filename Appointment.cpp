@@ -1,44 +1,26 @@
-#include <bits/stdc++.h>
+#include "Appointment.h"
+#include "utils.h"
 
 using namespace std;
 
-// [Length]AppointmentID|AppointmentDate|DoctorID
-class AppointmentManager {
-    class Appointment {
-        string ID;
-        string Date;
-        string DoctorID;
-        bool cmpAppID (Appointment &other) {
-            return this->ID < other.ID;
-        }
-        bool cmpDoctorID (Appointment &other) {
-            return this->ID < other.ID;
-        }
-    };
-    struct AvailListNode {
-        int position; // Byte position of the available record
-        AvailListNode* next;
+void AppointmentManager::addAppointment(Appointment appointment) {
 
-    };
-    vector<Appointment> loadData() { // load the data to a vector if needed
+}
+void AppointmentManager::updateAppointmentDate(int id) {
 
-    }
-    void updateAppointmentDate(int id) {
+}
+void AppointmentManager::updatePrimaryIndex() {
 
-    }
-    void updatePrimaryIndex() {
+}
+void AppointmentManager::updateSecondaryIndex() {
 
-    }
-    void updateSecondaryIndex() {
+}
+void AppointmentManager::updateFile() {
 
-    }
-    void updateFile() {
+}
+void AppointmentManager::deleteAppointment(int id) {
 
-    }
-    void deleteAppointment(int id) {
+}
+void AppointmentManager::printInfo(int id) {
 
-    }
-    void printInfo(int id) {
-
-    }
-};
+}

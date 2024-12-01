@@ -55,18 +55,6 @@ build CMakeFiles/Files_ass.dir/main.cpp.obj: CXX_COMPILER__Files_ass_unscanned_D
   OBJECT_DIR = CMakeFiles\Files_ass.dir
   OBJECT_FILE_DIR = CMakeFiles\Files_ass.dir
 
-build CMakeFiles/Files_ass.dir/Doctor.cpp.obj: CXX_COMPILER__Files_ass_unscanned_Debug C$:/extras/Projects/Files$ ass/Doctor.cpp || cmake_object_order_depends_target_Files_ass
-  DEP_FILE = CMakeFiles\Files_ass.dir\Doctor.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\Files_ass.dir
-  OBJECT_FILE_DIR = CMakeFiles\Files_ass.dir
-
-build CMakeFiles/Files_ass.dir/Appointment.cpp.obj: CXX_COMPILER__Files_ass_unscanned_Debug C$:/extras/Projects/Files$ ass/Appointment.cpp || cmake_object_order_depends_target_Files_ass
-  DEP_FILE = CMakeFiles\Files_ass.dir\Appointment.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\Files_ass.dir
-  OBJECT_FILE_DIR = CMakeFiles\Files_ass.dir
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Files_ass
@@ -75,7 +63,7 @@ build CMakeFiles/Files_ass.dir/Appointment.cpp.obj: CXX_COMPILER__Files_ass_unsc
 #############################################
 # Link the executable Files_ass.exe
 
-build Files_ass.exe: CXX_EXECUTABLE_LINKER__Files_ass_Debug CMakeFiles/Files_ass.dir/main.cpp.obj CMakeFiles/Files_ass.dir/Doctor.cpp.obj CMakeFiles/Files_ass.dir/Appointment.cpp.obj
+build Files_ass.exe: CXX_EXECUTABLE_LINKER__Files_ass_Debug CMakeFiles/Files_ass.dir/main.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\Files_ass.dir
