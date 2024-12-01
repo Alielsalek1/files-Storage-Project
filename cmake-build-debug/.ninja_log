@@ -1,0 +1,7 @@
+# ninja log v5
+2	2331	7547698467660570	CMakeFiles/Files_ass.dir/Doctor.cpp.obj	88fde66fc13e7db9
+0	2349	7547698467839192	CMakeFiles/Files_ass.dir/main.cpp.obj	568d8f97248bb5ac
+4	2368	7547698468042014	CMakeFiles/Files_ass.dir/Appointment.cpp.obj	4266fe61bf2154ab
+2368	2453	7547698468858281	Files_ass.exe	fa56a9409c34d4f6
+4	2032	7547698675745088	CMakeFiles/Files_ass.dir/main.cpp.obj	568d8f97248bb5ac
+2032	2107	7547698676452953	Files_ass.exe	fa56a9409c34d4f6
