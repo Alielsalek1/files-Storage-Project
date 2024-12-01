@@ -18,7 +18,6 @@ class DoctorManager {
     struct AvailListNode {
         int position; // Byte position of the available record
         AvailListNode* next;
-
     };
     vector<Doctor> loadData() { // load the data to a vector if needed
 

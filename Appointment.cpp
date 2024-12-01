@@ -15,6 +15,11 @@ class AppointmentManager {
             return this->ID < other.ID;
         }
     };
+    struct AvailListNode {
+        int position; // Byte position of the available record
+        AvailListNode* next;
+
+    };
     vector<Appointment> loadData() { // load the data to a vector if needed
 
     }
