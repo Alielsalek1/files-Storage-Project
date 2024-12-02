@@ -192,28 +192,18 @@ void DoctorManager::updateDoctorName(int id) {
 }
 
 void DoctorManager::printInfo(int id) {
-    vector<string> entries = loadData();
-    bool found = false;
-    int cnt = 0;
-    for (auto &s : entries) {
+    auto isFound = isDoctorPresent(to_string(id));
+    bool found = isFound.first;
+    int pos = isFound.second;
+    if (!found) return void(cout << "Doctor doesn't exist\n");
+
+    vector<string> data = loadData();
+    for (auto &s : data) {
         vector<string> cur = split(s, '|');
         if (cur[1] == to_string(id)) {
-            found = true;
-            break;
+            while (cur[3].back() == '_') cur[3].pop_back();
+            cout << cur[1] << " " << cur[2] << " " << cur[3] << endl;
+            return;
         }
-        cnt += 51;
     }
-    if (!found) return void(cout << "No doctor with this ID");
-
-    fstream file(DoctorsFile, ios::in | ios::binary);
-    file.seekg(cnt);
-    string line;
-    getline(file, line);
-
-    vector<string> parts = split(line, '|');
-    cout << "Doctor ID: " << parts[1] << "\n"
-         << "Name: " << parts[2] << "\n"
-         << "Address: " << parts[3] << "\n";
-
-    file.close();
 }

@@ -10,7 +10,7 @@ const string DoctorsFile = R"(C:\extras\Projects\Files ass\Data\Doctors.txt)";
 const string DoctorsPI = R"(C:\extras\Projects\Files ass\Indexes\DoctorsDoctorID.txt)";
 const string DoctorsSI = R"(C:\extras\Projects\Files ass\Indexes\DoctorsDoctorName.txt)";
 
-// Doctor Format Length|DoctorID|DoctorName|Address
+// Length|DoctorID|DoctorName|Address
 class DoctorManager {
 public:
     AvailListNode* availList = nullptr;
