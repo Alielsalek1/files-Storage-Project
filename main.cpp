@@ -13,7 +13,8 @@
 
         while (choice != 10) {
             // Menu Display
-            cout << "1 - Add New Doctor\n"
+            cout << endl
+                 <<"1 - Add New Doctor\n"
                  << "2 - Add New Appointment\n"
                  << "3 - Update Doctor Name (Doctor ID)\n"
                  << "4 - Update Appointment Date (Appointment ID)\n"

@@ -2,14 +2,14 @@
 #include "utils.h"
 
 void DoctorManager::addToAvailList(int position) {
-    AvailListNode* newNode = new AvailListNode{position, availList};
+    AvailListNode *newNode = new AvailListNode{position, availList};
     availList = newNode;
 }
 
 int DoctorManager::getFromAvailList() {
     if (availList == nullptr) return -1;
     int position = availList->position;
-    AvailListNode* toDelete = availList;
+    AvailListNode *toDelete = availList;
     availList = availList->next;
     delete toDelete;
     return position;
@@ -68,12 +68,12 @@ void DoctorManager::updateIndexes() {
     file.close();
 
     ofstream primaryFile(DoctorsPI, ios::trunc);
-    for (auto &entry : primaryIndex)
+    for (auto &entry: primaryIndex)
         primaryFile << entry.first << "|" << entry.second << "\n";
     primaryFile.close();
 
     ofstream secondaryFile(DoctorsSI, ios::trunc);
-    for (auto &entry : secondaryIndex)
+    for (auto &entry: secondaryIndex)
         secondaryFile << entry.first << "|" << entry.second << "\n";
     secondaryFile.close();
 }
@@ -97,7 +97,7 @@ vector<string> DoctorManager::loadData() {
 pair<bool, int> DoctorManager::isDoctorPresent(string ID) {
     vector<string> entries = loadData();
     int cnt = 0;
-    for (auto &s : entries) {
+    for (auto &s: entries) {
         vector<string> cur = split(s, '|');
         if (cur[1] == ID && cur[0][0] != '*') return {true, cnt};
         cnt += 51;
@@ -127,7 +127,7 @@ void DoctorManager::addDoctor(Doctor &doctor) {
         vector<string> lines = loadData();
         ofstream file(DoctorsFile, ios::out | ios::trunc);
         size_t currentByte = 0;
-        for (auto& line : lines) {
+        for (auto &line: lines) {
             if (currentByte == position)
                 file << inform << endl;
             else {
@@ -140,6 +140,7 @@ void DoctorManager::addDoctor(Doctor &doctor) {
     }
     updateIndexes();
 }
+
 void DoctorManager::deleteDoctor(int id) {
     auto isFound = isDoctorPresent(to_string(id));
     bool found = isFound.first;
@@ -149,7 +150,7 @@ void DoctorManager::deleteDoctor(int id) {
     vector<string> lines = loadData();
     ofstream file(DoctorsFile, ios::out | ios::trunc);
     size_t currentByte = 0;
-    for (auto& line : lines) {
+    for (auto &line: lines) {
         if (currentByte == pos) line[0] = '*';
         while (line.back() == '\r' || line.back() == '\n') line.pop_back();
         file << line << endl;
@@ -162,6 +163,7 @@ void DoctorManager::deleteDoctor(int id) {
 
     updateIndexes();
 }
+
 void DoctorManager::updateDoctorName(int id) {
     auto isFound = isDoctorPresent(to_string(id));
     bool found = isFound.first;
@@ -174,7 +176,7 @@ void DoctorManager::updateDoctorName(int id) {
     cin >> newName;
 
     vector<string> records = loadData(), v;
-    for (string s : records) {
+    for (string s: records) {
         vector<string> cur = split(s, '|');
         if (cur[1] == to_string(id)) {
             v = cur;
@@ -198,11 +200,13 @@ void DoctorManager::printInfo(int id) {
     if (!found) return void(cout << "Doctor doesn't exist\n");
 
     vector<string> data = loadData();
-    for (auto &s : data) {
+    for (auto &s: data) {
         vector<string> cur = split(s, '|');
         if (cur[1] == to_string(id)) {
             while (cur[3].back() == '_') cur[3].pop_back();
-            cout << cur[1] << " " << cur[2] << " " << cur[3] << endl;
+            cout << "Doctor's ID: " << cur[1] << endl;
+            cout << "Doctor's Name: " << cur[2] << endl;
+            cout << "Doctor's Address: " << cur[3] << endl;
             return;
         }
     }

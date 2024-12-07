@@ -203,7 +203,10 @@ void AppointmentManager::printInfo(int id) {
         vector<string> cur = split(s, '|');
         if (cur[1] == to_string(id)) {
             while (cur[3].back() == '_') cur[3].pop_back();
-            cout << cur[1] << " " << cur[2] << " " << cur[3] << endl;
+
+            cout << "Appointment ID: " << cur[1] << endl;
+            cout << "Doctor's ID: " << cur[2] << endl;
+            cout << "Appointment Date: " << cur[3] << endl;
             return;
         }
     }

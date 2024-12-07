@@ -16,10 +16,10 @@ using namespace std;
 
 class QueryHandler {
 private:
-    DoctorManager* doctorManager;
-    AppointmentManager* appointmentManager;
+    DoctorManager *doctorManager;
+    AppointmentManager *appointmentManager;
 
-    map<string, string> parseConditions(const string& whereClause) {
+    map<string, string> parseConditions(const string &whereClause) {
         map<string, string> conditions;
         istringstream ss(whereClause);
         string token;
@@ -37,28 +37,34 @@ private:
         return conditions;
     }
 
-    vector<string> executeSelect(const string& table, const map<string, string>& conditions, const string& fields) {
+    vector<string> executeSelect(const string &table, const map<string, string> &conditions, const string &fields) {
         vector<string> results;
 
-        auto extractFields = [](const vector<string>& parts, const vector<int>& indices) {
+        auto extractFields = [](const vector<string> &parts, const vector<int> &indices) {
             string result;
-            for (int index : indices) {
+            for (int index: indices) {
                 if (!result.empty()) result += "|";
-                result += parts[index];
+                if(parts[index].ends_with('_')) {
+                    result += split(parts[index],'_')[0];
+                }
+                else result += parts[index];
             }
             return result;
         };
 
         if (toUpperCase(table) == "DOCTORS") {
             vector<string> records = doctorManager->loadData();
-            for (const auto& record : records) {
+            for (const auto &record: records) {
                 if (record.empty() || record[0] == '*') continue;
                 vector<string> parts = split(record, '|');
-                bool match = true;
+                bool match = conditions.empty();
 
-                for (const auto& condition : conditions) {
-                    if (toUpperCase(condition.first) == "DOCTORID" && parts[1] != condition.second) {
-                        match = false;
+                for (const auto &condition: conditions) {
+                    if ((toUpperCase(condition.first) == "DOCTORID" && parts[1] == condition.second) ||
+                        (toUpperCase(condition.first) == "DOCTORNAME" && parts[2] == condition.second) ||
+                        (toUpperCase(condition.first) == "DOCTORADDRESS" && parts[3] == condition.second)
+                        ) {
+                        match = true;
                         break;
                     }
                 }
@@ -72,21 +78,26 @@ private:
                     } else {
                         // Map requested fields to indices
                         vector<int> fieldIndices;
+                        if (toUpperCase(fields) == "DOCTOR ID") fieldIndices.push_back(1);
                         if (toUpperCase(fields) == "DOCTOR NAME") fieldIndices.push_back(2);
+                        if (toUpperCase(fields) == "DOCTOR ADDRESS") fieldIndices.push_back(3);
                         results.push_back(extractFields(parts, fieldIndices));
                     }
                 }
             }
         } else if (toUpperCase(table) == "APPOINTMENTS") {
             vector<string> records = appointmentManager->loadData();
-            for (const auto& record : records) {
+            for (const auto &record: records) {
                 if (record.empty() || record[0] == '*') continue;
                 vector<string> parts = split(record, '|');
-                bool match = true;
+                bool match = conditions.empty();
 
-                for (const auto& condition : conditions) {
-                    if (toUpperCase(condition.first) == "DOCTORID" && parts[2] != condition.second) {  // DoctorID is in index 2
-                        match = false;
+                for (const auto &condition: conditions) {
+                    if ((toUpperCase(condition.first) == "APPOINTMENTID" && parts[1] == condition.second) ||
+                        (toUpperCase(condition.first) == "DOCTORID" && parts[2] == condition.second) ||
+                        (toUpperCase(condition.first) == "APPOINTMENTDATE" && parts[3] == condition.second)
+                            ) {
+                        match = true;
                         break;
                     }
                 }
@@ -113,26 +124,24 @@ private:
     }
 
 
-
-
 public:
-    QueryHandler(DoctorManager* doctorMgr, AppointmentManager* appointmentMgr)
+    QueryHandler(DoctorManager *doctorMgr, AppointmentManager *appointmentMgr)
             : doctorManager(doctorMgr), appointmentManager(appointmentMgr) {}
 
-    string toUpperCase(const string& str) {
+    string toUpperCase(const string &str) {
         string result = str;
         transform(result.begin(), result.end(), result.begin(), ::toupper);
         return result;
     }
 
-    static inline string trim(const string& s) {
+    static inline string trim(const string &s) {
         auto start = s.find_first_not_of(" \t\n\r");
         if (start == string::npos) return "";
         auto end = s.find_last_not_of(" \t\n\r");
         return s.substr(start, end - start + 1);
     }
 
-    void processQuery(const string& query) {
+    void processQuery(const string &query) {
         cout << "[DEBUG] Received Query: '" << query << "'" << endl;
 
         // Use the trim function to remove leading/trailing spaces
@@ -183,7 +192,7 @@ public:
             if (results.empty()) {
                 cout << "[DEBUG] No results found for the query." << endl;
             } else {
-                for (const auto& result : results) {
+                for (const auto &result: results) {
                     cout << "[DEBUG] Result: " << result << endl;
                     cout << result << endl;
                 }
