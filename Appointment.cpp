@@ -73,6 +73,7 @@ void AppointmentManager::updateIndexes() {
     for (auto &entry : primaryIndex)
         primaryFile << entry.first << "|" << entry.second << "\n";
     primaryFile.close();
+    std::sort(secondaryIndex.begin(), secondaryIndex.end());
 
     ofstream secondaryFile(AppointmentsSI, ios::trunc);
     for (auto &entry : secondaryIndex)

@@ -36,90 +36,118 @@ private:
         }
         return conditions;
     }
+    string extractFields(const vector<string> &parts, const vector<int> &indices) {
+        string result;
+        for (int index: indices) {
+            if (!result.empty()) result += "|";
+            if (parts[index].ends_with('_')) {
+                result += split(parts[index], '_')[0];
+            } else result += parts[index];
+        }
+        return result;
+    };
+
+    vector<string> executeSelectWithNoConditions(const string &table, const string &fields) {
+        vector<string> records, results;
+        if (toUpperCase(table) == "DOCTORS") {
+            records = doctorManager->loadData();
+        } else if (toUpperCase(table) == "APPOINTMENTS") {
+            records = appointmentManager->loadData();
+        }
+        for (auto record: records) {
+            if (record.empty() || record[0] == '*') continue;
+            vector<string> parts = split(record, '|');
+            if (fields == "*" || toUpperCase(fields) == "ALL") {
+                int pos = record.find('|') + 1;
+                int lastPos = record.find('_');
+                record = record.substr(pos, lastPos - pos);
+
+                auto recordVector = split(record, '|');
+                string result;
+                for (const auto &item: recordVector) result += item + ' ';
+                results.push_back(result);
+            }
+            else{
+                vector<int> fieldIndices;
+                if (toUpperCase(fields) == "DOCTOR ID" and toUpperCase(table) == "DOCTORS") fieldIndices.push_back(1);
+                if (toUpperCase(fields) == "DOCTOR NAME") fieldIndices.push_back(2);
+                if (toUpperCase(fields) == "DOCTOR ADDRESS") fieldIndices.push_back(3);
+
+                if (toUpperCase(fields) == "APPOINTMENT ID") fieldIndices.push_back(1);
+                if (toUpperCase(fields) == "DOCTOR ID" and toUpperCase(table) == "APPOINTMENTS") fieldIndices.push_back(2);
+                if (toUpperCase(fields) == "APPOINTMENT DATE") fieldIndices.push_back(3);
+                results.push_back(extractFields(parts, fieldIndices));
+            }
+        }
+        return results;
+    }
 
     vector<string> executeSelect(const string &table, const map<string, string> &conditions, const string &fields) {
         vector<string> results;
 
-        auto extractFields = [](const vector<string> &parts, const vector<int> &indices) {
-            string result;
-            for (int index: indices) {
-                if (!result.empty()) result += "|";
-                if(parts[index].ends_with('_')) {
-                    result += split(parts[index],'_')[0];
-                }
-                else result += parts[index];
-            }
-            return result;
-        };
-
+        string record;
+        int offset;
+        string min_id = "1";
+        if (conditions.empty()) {
+            return executeSelectWithNoConditions(table,fields);
+        }
+        ifstream file(DoctorsFile, ios::binary);
         if (toUpperCase(table) == "DOCTORS") {
-            vector<string> records = doctorManager->loadData();
-            for (const auto &record: records) {
-                if (record.empty() || record[0] == '*') continue;
-                vector<string> parts = split(record, '|');
-                bool match = conditions.empty();
+            for (pair<string, string> condition: conditions) {
+                if (!file.is_open()) return vector<string>() = {"Couldn't open doctors file. "};
 
-                for (const auto &condition: conditions) {
-                    if ((toUpperCase(condition.first) == "DOCTORID" && parts[1] == condition.second) ||
-                        (toUpperCase(condition.first) == "DOCTORNAME" && parts[2] == condition.second) ||
-                        (toUpperCase(condition.first) == "DOCTORADDRESS" && parts[3] == condition.second)
-                        ) {
-                        match = true;
-                        break;
-                    }
-                }
-
-                if (match) {
-                    if (fields == "*" || toUpperCase(fields) == "ALL") {
-                        int pos = record.find('|') + 1;
-                        int lastPos = record.find('_');
-                        string result = record.substr(pos, lastPos - pos);
-                        results.push_back(result);
-                    } else {
-                        // Map requested fields to indices
-                        vector<int> fieldIndices;
-                        if (toUpperCase(fields) == "DOCTOR ID") fieldIndices.push_back(1);
-                        if (toUpperCase(fields) == "DOCTOR NAME") fieldIndices.push_back(2);
-                        if (toUpperCase(fields) == "DOCTOR ADDRESS") fieldIndices.push_back(3);
-                        results.push_back(extractFields(parts, fieldIndices));
-                    }
+                if (toUpperCase(condition.first) == "DOCTORID") {
+                    offset = lower_bound(doctorManager->primaryIndex.begin(), doctorManager->primaryIndex.end(),
+                                         pair(condition.second, 0))->second;
+                } else if (toUpperCase(condition.first) == "DOCTORNAME") {
+                    string id = lower_bound(doctorManager->secondaryIndex.begin(), doctorManager->secondaryIndex.end(),
+                                            pair(condition.second, min_id))->second;
+                    offset = lower_bound(doctorManager->primaryIndex.begin(), doctorManager->primaryIndex.end(),
+                                         pair(id, 0))->second;
                 }
             }
         } else if (toUpperCase(table) == "APPOINTMENTS") {
-            vector<string> records = appointmentManager->loadData();
-            for (const auto &record: records) {
-                if (record.empty() || record[0] == '*') continue;
-                vector<string> parts = split(record, '|');
-                bool match = conditions.empty();
+            for (pair<string, string> condition: conditions) {
+                if (!file.is_open()) return vector<string>() = {"Couldn't open appointments file. "};
 
-                for (const auto &condition: conditions) {
-                    if ((toUpperCase(condition.first) == "APPOINTMENTID" && parts[1] == condition.second) ||
-                        (toUpperCase(condition.first) == "DOCTORID" && parts[2] == condition.second) ||
-                        (toUpperCase(condition.first) == "APPOINTMENTDATE" && parts[3] == condition.second)
-                            ) {
-                        match = true;
-                        break;
-                    }
-                }
-
-                if (match) {
-                    if (fields == "*" || toUpperCase(fields) == "ALL") {
-                        int pos = record.find('|') + 1;
-                        int lastPos = record.find('_');
-                        string result = record.substr(pos, lastPos - pos);
-                        results.push_back(result); // Return full record
-                    } else {
-                        // Map requested fields to indices
-                        vector<int> fieldIndices;
-                        if (toUpperCase(fields) == "APPOINTMENT ID") fieldIndices.push_back(1);
-                        if (toUpperCase(fields) == "DOCTOR ID") fieldIndices.push_back(2);
-                        if (toUpperCase(fields) == "APPOINTMENT DATE") fieldIndices.push_back(3);
-                        results.push_back(extractFields(parts, fieldIndices));
-                    }
+                if (toUpperCase(condition.first) == "APPOINTMENTID") {
+                    offset = lower_bound(appointmentManager->primaryIndex.begin(),
+                                         appointmentManager->primaryIndex.end(),
+                                         pair(condition.second, 0))->second;
+                } else if (toUpperCase(condition.first) == "DOCTORNAME") {
+                    string id = lower_bound(appointmentManager->secondaryIndex.begin(),
+                                            appointmentManager->secondaryIndex.end(),
+                                            pair(condition.second, min_id))->second;
+                    offset = lower_bound(appointmentManager->primaryIndex.begin(),
+                                         appointmentManager->primaryIndex.end(),
+                                         pair(id, 0))->second;
                 }
             }
         }
+        file.seekg(offset);
+        getline(file, record, '_');
+        file.close();
+        vector<string> parts = split(record, '|');
 
+        if (fields == "*" || toUpperCase(fields) == "ALL") {
+            auto recordVector = split(record, '|');
+            string result;
+            for (const auto &item: recordVector) result += item;
+            results.push_back(result);
+        } else {
+            vector<int> fieldIndices;
+            if(toUpperCase(table) == "DOCTORS"){
+                if (toUpperCase(fields) == "DOCTOR ID") fieldIndices.push_back(1);
+                if (toUpperCase(fields) == "DOCTOR NAME") fieldIndices.push_back(2);
+                if (toUpperCase(fields) == "DOCTOR ADDRESS") fieldIndices.push_back(3);
+            }
+            else if(toUpperCase(table) == "APPOINTMENTS") {
+                if (toUpperCase(fields) == "APPOINTMENT ID") fieldIndices.push_back(1);
+                if (toUpperCase(fields) == "DOCTOR ID") fieldIndices.push_back(2);
+                if (toUpperCase(fields) == "APPOINTMENT DATE") fieldIndices.push_back(3);
+            }
+            results.push_back(extractFields(parts, fieldIndices));
+        }
         return results;
     }
 
