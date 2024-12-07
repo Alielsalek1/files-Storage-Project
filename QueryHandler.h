@@ -49,7 +49,7 @@ private:
             return result;
         };
 
-        if (table == "Doctors") {
+        if (toUpperCase(table) == "DOCTORS") {
             vector<string> records = doctorManager->loadData();
             for (const auto& record : records) {
                 if (record.empty() || record[0] == '*') continue;
@@ -57,7 +57,7 @@ private:
                 bool match = true;
 
                 for (const auto& condition : conditions) {
-                    if (condition.first == "DoctorID" && parts[1] != condition.second) {
+                    if (toUpperCase(condition.first) == "DOCTORID" && parts[1] != condition.second) {
                         match = false;
                         break;
                     }
@@ -65,16 +65,19 @@ private:
 
                 if (match) {
                     if (fields == "*" || toUpperCase(fields) == "ALL") {
-                        results.push_back(record); // Return full record
+                        int pos = record.find('|') + 1;
+                        int lastPos = record.find('_');
+                        string result = record.substr(pos, lastPos - pos);
+                        results.push_back(result);
                     } else {
                         // Map requested fields to indices
                         vector<int> fieldIndices;
-                        if (toUpperCase(fields) == "DOCTOR NAME") fieldIndices.push_back(2); // Example mapping
+                        if (toUpperCase(fields) == "DOCTOR NAME") fieldIndices.push_back(2);
                         results.push_back(extractFields(parts, fieldIndices));
                     }
                 }
             }
-        } else if (table == "Appointments") {
+        } else if (toUpperCase(table) == "APPOINTMENTS") {
             vector<string> records = appointmentManager->loadData();
             for (const auto& record : records) {
                 if (record.empty() || record[0] == '*') continue;
@@ -82,7 +85,7 @@ private:
                 bool match = true;
 
                 for (const auto& condition : conditions) {
-                    if (condition.first == "DoctorID" && parts[2] != condition.second) {  // DoctorID is in index 2
+                    if (toUpperCase(condition.first) == "DOCTORID" && parts[2] != condition.second) {  // DoctorID is in index 2
                         match = false;
                         break;
                     }
@@ -90,7 +93,10 @@ private:
 
                 if (match) {
                     if (fields == "*" || toUpperCase(fields) == "ALL") {
-                        results.push_back(record); // Return full record
+                        int pos = record.find('|') + 1;
+                        int lastPos = record.find('_');
+                        string result = record.substr(pos, lastPos - pos);
+                        results.push_back(result); // Return full record
                     } else {
                         // Map requested fields to indices
                         vector<int> fieldIndices;
