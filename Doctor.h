@@ -8,7 +8,7 @@ using namespace std;
 
 const string DoctorsFile = "../Data/Doctors.txt";
 const string DoctorsPI = "../Indexes/DoctorsDoctorID.txt";
-const string DoctorsSI = "../Indexes/DoctorsDoctorName.txt)";
+const string DoctorsSI = "../Indexes/DoctorsDoctorName.txt";
 
 
 // Length|DoctorID|DoctorName|Address
