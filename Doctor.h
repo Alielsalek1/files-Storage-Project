@@ -6,9 +6,10 @@
 
 using namespace std;
 
-const string DoctorsFile = R"(C:\extras\Projects\Files ass\Data\Doctors.txt)";
-const string DoctorsPI = R"(C:\extras\Projects\Files ass\Indexes\DoctorsDoctorID.txt)";
-const string DoctorsSI = R"(C:\extras\Projects\Files ass\Indexes\DoctorsDoctorName.txt)";
+const string DoctorsFile = "../Data/Doctors.txt";
+const string DoctorsPI = "../Indexes/DoctorsDoctorID.txt";
+const string DoctorsSI = "../Indexes/DoctorsDoctorName.txt)";
+
 
 // Length|DoctorID|DoctorName|Address
 class DoctorManager {

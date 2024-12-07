@@ -5,9 +5,9 @@
 #include "utils.h"
 using namespace std;
 
-const string AppointmentsFile = R"(C:\extras\Projects\Files ass\Data\Appointments.txt)";
-const string AppointmentsPI = R"(C:\extras\Projects\Files ass\Indexes\AppointmentsAppointmentID.txt)";
-const string AppointmentsSI = R"(C:\extras\Projects\Files ass\Indexes\AppointmentsDoctorID.txt)";
+const string AppointmentsFile = "../Data/Appointments.txt";
+const string AppointmentsPI = "../Indexes/AppointmentsAppointmentID.txt";
+const string AppointmentsSI = "../Indexes/AppointmentsDoctorID.txt";
 
 // Length|AppointmentID|AppointmentDate|DoctorID
 class AppointmentManager {
