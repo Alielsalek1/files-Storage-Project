@@ -34,7 +34,48 @@ public:
 
 struct AvailListNode {
     int position;
+    int size;
     AvailListNode* next;
+};
+
+struct Node {
+    string data;
+    Node* next;
+
+    Node(string value) : data(value), next(nullptr) {}
+};
+
+struct LinkedList {
+    Node* head;
+
+    LinkedList() : head(nullptr) {}
+
+    void insertBack(string value) {
+        Node* newNode = new Node(value);
+
+        if (head == nullptr) {
+            head = newNode;
+        } else {
+
+            Node* temp = head;
+            while (temp->next != nullptr) {
+                temp = temp->next;
+            }
+            temp->next = newNode;
+        }
+    }
+
+    deque<string> get() {
+        deque<string> result;
+        Node* temp = head;
+
+        while (temp != nullptr) {
+            result.push_back(temp->data);
+            temp = temp->next;
+        }
+
+        return result;
+    }
 };
 
 vector<string> split(string s, char delimiter);

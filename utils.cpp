@@ -7,6 +7,7 @@
 using namespace std;
 
 vector<string> split(string s, char delimiter) {
+    if (s.empty() || s == "\n") return {};
     vector<string> tokens;
     stringstream ss(s);
     string item;

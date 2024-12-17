@@ -14,18 +14,18 @@ class AppointmentManager {
 public:
     AvailListNode* availList = nullptr;
     vector<pair<string, int>> primaryIndex;
-    vector<pair<string, string>> secondaryIndex;
-    void loadIndexes();
-    void updateIndexes();
+    map<string, LinkedList> secondaryIndex;
+
     AppointmentManager();
+    void updateIndexes();
     void addAppointment(Appointment appointment);
     void deleteAppointment(int id);
     void updateAppointmentDate(int id);
     void printInfo(int id);
-    void addToAvailList(int position);
-    int getFromAvailList();
+    void addToAvailList(int position, int size);
+    int getFromAvailList(int stringSize);
     vector<string> loadData();
-    pair<bool, int> isAppointmentPresent(string ID);
+    bool isAppointmentPresent(string ID);
 };
 
 #include "Appointment.cpp"

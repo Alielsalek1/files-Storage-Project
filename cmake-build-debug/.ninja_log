@@ -1,12 +1,7 @@
 # ninja log v5
-3	2610	7548429116239273	CMakeFiles/Files_ass.dir/main.cpp.obj	568d8f97248bb5ac
 7	2575	7547760398821170	CMakeFiles/Files_ass.dir/Doctor.cpp.obj	88fde66fc13e7db9
+3	3098	7561798763049797	CMakeFiles/Files_ass.dir/main.cpp.obj	568d8f97248bb5ac
 5	2276	7547766696128171	CMakeFiles/Files_ass.dir/Appointment.cpp.obj	4266fe61bf2154ab
+2	93	7561799676228865	build.ninja	72329d0a1b2c0935
+3099	3387	7561798765948998	Files_ass.exe	1ba7f56e3419cc4e
 7	2322	7547766696574185	CMakeFiles/Files_ass.dir/utils.cpp.obj	7659ac28eab5f88f
-2611	2757	7548429117687810	Files_ass.exe	1ba7f56e3419cc4e
-3	2505	7548430942947154	CMakeFiles/Files_ass.dir/main.cpp.obj	568d8f97248bb5ac
-2506	2627	7548430944168090	Files_ass.exe	1ba7f56e3419cc4e
-3	2408	7548433292969927	CMakeFiles/Files_ass.dir/main.cpp.obj	568d8f97248bb5ac
-2408	2534	7548433294216986	Files_ass.exe	1ba7f56e3419cc4e
-2	2459	7548438517385602	CMakeFiles/Files_ass.dir/main.cpp.obj	568d8f97248bb5ac
-2471	2601	7548438518804607	Files_ass.exe	1ba7f56e3419cc4e

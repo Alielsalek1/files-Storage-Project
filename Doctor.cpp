@@ -1,56 +1,77 @@
 #include "Doctor.h"
 #include "utils.h"
 
-void DoctorManager::addToAvailList(int position) {
-    AvailListNode *newNode = new AvailListNode{position, availList};
-    availList = newNode;
+DoctorManager::DoctorManager() {
+    updateIndexes();
 }
 
-int DoctorManager::getFromAvailList() {
-    if (availList == nullptr) return -1;
-    int position = availList->position;
-    AvailListNode *toDelete = availList;
-    availList = availList->next;
-    delete toDelete;
-    return position;
-}
+// Function to add a block to the availList
+void DoctorManager::addToAvailList(int position, int size) {
+    AvailListNode* newNode = new AvailListNode{position, size, nullptr};
 
-void DoctorManager::loadIndexes() {
-    ifstream file(DoctorsFile, ios::binary);
-    if (!file.is_open()) return;
-
-    string line;
-    int position = 0;
-
-    while (getline(file, line)) {
-        if (line[0] == '*') {
-            addToAvailList(position);
-        } else {
-            vector<string> parts = split(line, '|');
-            primaryIndex.emplace_back(parts[1], position);
-            secondaryIndex.emplace_back(parts[2], parts[1]);
-        }
-        position = file.tellg();
+    // If the list is empty or the new block is larger than the head, insert at the head
+    if (availList == nullptr || size > availList->size) {
+        newNode->next = availList;
+        availList = newNode;
+        return;
     }
 
-    file.close();
+    // Find the correct position to insert the new node to keep the list sorted in descending order
+    AvailListNode* current = availList;
+    while (current->next != nullptr && current->next->size >= size) {
+        current = current->next;
+    }
+
+    // Insert the new node
+    newNode->next = current->next;
+    current->next = newNode;
+}
+
+// Function to get the first available block from the availList
+int DoctorManager::getFromAvailList(int stringSize) {
+    if (availList == nullptr) return -1; // List is empty
+
+    // Check if the head can accommodate the string
+    if (availList->size < stringSize) return -1; // Not enough space
+
+    // Get the byte offset for insertion
+    int byteOffset = availList->position;
+
+    // Adjust the head block
+    availList->position += stringSize;
+    availList->size -= stringSize;
+
+    // Remove the head if it is completely used up
+    if (availList->size > 1) {
+        fstream file(DoctorsFile, ios::in | ios::out | ios::binary);
+        file.seekp(availList->position, ios::beg);
+        file.write("*", 1);
+        file.close();
+    }
+
+    AvailListNode* toDelete = availList;
+    availList = availList->next;
+    addToAvailList(toDelete->position, toDelete->size); //reclaim space
+    delete toDelete;
+
+    return byteOffset;
 }
 
 void DoctorManager::updateIndexes() {
-    ifstream file(DoctorsFile, ios::binary);
+    ifstream file(DoctorsFile, ios::in | ios::out | ios::binary);
     primaryIndex.clear(), secondaryIndex.clear();
 
-    int pos = 0;
     char ch;
     string line;
     vector<string> curRecord;
+    int pos = 0, pst = 0;
     while (file.get(ch)) {
         if (line.empty() && curRecord.size()) {
             if (curRecord[0][0] != '*') {
-                primaryIndex.emplace_back(curRecord[1], pos);
-                secondaryIndex.emplace_back(curRecord[2], curRecord[1]);
+                primaryIndex.emplace_back(curRecord[1], pst);
+                secondaryIndex[curRecord[2]].insertBack(curRecord[1]);
             }
-            pos += 51;
+            pst = pos;
         }
         if (ch == '\n') {
             while (line.size() && (line.back() == '\r' || line.back() == '\n')) line.pop_back();
@@ -58,29 +79,32 @@ void DoctorManager::updateIndexes() {
             line.clear();
         } else
             line.push_back(ch);
+        pos++;
     }
-
     if (line.empty() && curRecord.size() && curRecord[0][0] != '*') {
-        primaryIndex.emplace_back(curRecord[1], pos);
-        secondaryIndex.emplace_back(curRecord[2], curRecord[1]);
+        primaryIndex.emplace_back(curRecord[1], pst);
+        secondaryIndex[curRecord[2]].insertBack(curRecord[1]);
     }
-
     file.close();
 
-    ofstream primaryFile(DoctorsPI, ios::trunc);
-    for (auto &entry: primaryIndex)
+    sort(primaryIndex.begin(), primaryIndex.end(),
+         [](pair<string, int>& a, pair<string, int>& b) {
+             return stoi(a.first) < stoi(b.first);
+         });
+
+    fstream primaryFile(DoctorsPI, ios::in | ios::out | ios::binary | ios::trunc);
+    for (auto &entry : primaryIndex)
         primaryFile << entry.first << "|" << entry.second << "\n";
     primaryFile.close();
-    std::sort(secondaryIndex.begin(), secondaryIndex.end());
 
-    ofstream secondaryFile(DoctorsSI, ios::trunc);
-    for (auto &entry: secondaryIndex)
-        secondaryFile << entry.first << "|" << entry.second << "\n";
+    fstream secondaryFile(DoctorsSI, ios::in | ios::out | ios::binary | ios::trunc);
+    for (auto &entry: secondaryIndex) {
+        secondaryFile << entry.first << "|";
+        auto x = entry.second.get();
+        for (auto &id: x) secondaryFile << id << "|";
+        secondaryFile << "\n";
+    }
     secondaryFile.close();
-}
-
-DoctorManager::DoctorManager() {
-    loadIndexes();
 }
 
 vector<string> DoctorManager::loadData() {
@@ -91,95 +115,79 @@ vector<string> DoctorManager::loadData() {
     while (getline(file, line)) ret.push_back(line);
 
     file.close();
-
     return ret;
 }
 
-pair<bool, int> DoctorManager::isDoctorPresent(string ID) {
+bool DoctorManager::isDoctorPresent(string ID) {
     vector<string> entries = loadData();
-    int cnt = 0;
-    for (auto &s: entries) {
+    for (auto &s : entries) {
         vector<string> cur = split(s, '|');
-        if (cur[1] == ID && cur[0][0] != '*') return {true, cnt};
-        cnt += 51;
+        if (cur.size() && cur[0][0] != '*' && cur[1] == ID) return true;
     }
-    return {false, 0};
+    return false;
 }
 
 void DoctorManager::addDoctor(Doctor &doctor) {
-    auto isFound = isDoctorPresent(doctor.ID);
-    bool found = isFound.first;
-    int pos = isFound.second;
-    if (found) return void(cout << "Doctor already exists\n");
+    if (isDoctorPresent(doctor.ID)) return void(cout << "Doctor already exists\n");
 
     string record = doctor.ID + "|" + doctor.Name + "|" + doctor.Address;
-    string inform = to_string(record.size()) + "|" + record;
-
-    inform += string(50 - inform.size(), '_');
+    string inform = to_string(record.size()) + "|" + record + "\n";
 
     fstream file(DoctorsFile, ios::in | ios::out | ios::binary);
-    int position = getFromAvailList();
-    if (position == -1) {
+    int position = getFromAvailList((int)inform.size());
+    if (position == -1)
         file.seekp(0, ios::end);
-        file << inform << endl;
-        file.close();
-    } else {
-        file.close();
-        vector<string> lines = loadData();
-        ofstream file(DoctorsFile, ios::out | ios::trunc);
-        size_t currentByte = 0;
-        for (auto &line: lines) {
-            if (currentByte == position)
-                file << inform << endl;
-            else {
-                while (line.back() == '\r' || line.back() == '\n') line.pop_back();
-                file << line << endl;
-            }
-            currentByte += line.size() + 1;
-        }
-        file.close();
-    }
+    else
+        file.seekp(position, ios::beg);
+    file.write(inform.c_str(), (int)inform.size());
+    file.close();
+
     updateIndexes();
 }
 
-void DoctorManager::deleteDoctor(int id) {
-    auto isFound = isDoctorPresent(to_string(id));
-    bool found = isFound.first;
-    int pos = isFound.second;
-    if (!found) return void(cout << "Doctor doesn't exist\n");
+int DoctorManager::getByteOffset(int id) {
+    for (auto &[ID, offset] : primaryIndex)
+        if (stoi(ID) == id) return offset;
+    return -1;
+}
 
-    vector<string> lines = loadData();
-    ofstream file(DoctorsFile, ios::out | ios::trunc);
-    size_t currentByte = 0;
-    for (auto &line: lines) {
-        if (currentByte == pos) line[0] = '*';
-        while (line.back() == '\r' || line.back() == '\n') line.pop_back();
+void DoctorManager::deleteDoctor(int id) {
+    if (!isDoctorPresent(to_string(id))) return void(cout << "Doctor doesn't exist\n");
+
+    fstream file(DoctorsFile, ios::in | ios::out | ios::binary);
+
+    auto lines = loadData();
+    int currentByte = 0, pos, sz;
+    for (auto& line : lines) {
+        auto cur = split(line, '|');
+
+        if (cur.size() && cur[0][0] != '*' && cur[1] == to_string(id)) {
+            line[0] = '*';
+            pos = currentByte;
+            while (line.back() == '\r' || line.back() == '\n') line.pop_back();
+            sz = (int)line.size() + 1;
+        }
         file << line << endl;
 
-        currentByte += line.size() + 1;
+        currentByte += (int)line.size() + 1;
     }
     file.close();
 
-    addToAvailList(pos);
+    addToAvailList(pos, sz);
 
     updateIndexes();
 }
 
 void DoctorManager::updateDoctorName(int id) {
-    auto isFound = isDoctorPresent(to_string(id));
-    bool found = isFound.first;
-    int pos = isFound.second;
-    if (!found) return void(cout << "Doctor doesn't exist\n");
+    if (!isDoctorPresent(to_string(id))) return void(cout << "Doctor doesn't exist\n");
 
-    // get new name
     cout << "Enter new name: ";
-    string newName;
-    cin >> newName;
+    string newName; cin >> newName;
 
     vector<string> records = loadData(), v;
-    for (string s: records) {
+    for (string s : records) {
         vector<string> cur = split(s, '|');
-        if (cur[1] == to_string(id)) {
+        if (cur.size() && cur[0][0] != '*' && cur[1] == to_string(id)) {
             v = cur;
             break;
         }
@@ -188,26 +196,22 @@ void DoctorManager::updateDoctorName(int id) {
     // modify doctor
     Doctor doctor;
     doctor.Name = newName, doctor.ID = to_string(id), doctor.Address = v[3];
-    while (doctor.Address.back() == '_') doctor.Address.pop_back();
+
     // update
     deleteDoctor(id);
     addDoctor(doctor);
 }
 
 void DoctorManager::printInfo(int id) {
-    auto isFound = isDoctorPresent(to_string(id));
-    bool found = isFound.first;
-    int pos = isFound.second;
-    if (!found) return void(cout << "Doctor doesn't exist\n");
+    if (!isDoctorPresent(to_string(id))) return void(cout << "Doctor doesn't exist\n");
 
     vector<string> data = loadData();
-    for (auto &s: data) {
+    for (auto &s : data) {
         vector<string> cur = split(s, '|');
-        if (cur[1] == to_string(id)) {
-            while (cur[3].back() == '_') cur[3].pop_back();
-            cout << "Doctor's ID: " << cur[1] << endl;
-            cout << "Doctor's Name: " << cur[2] << endl;
-            cout << "Doctor's Address: " << cur[3] << endl;
+        if (cur.size() && cur[0][0] != '*' && cur[1] == to_string(id)) {
+            cout << "Doctor Id:" << cur[1] << endl;
+            cout << "Doctor Name:" << cur[2] << endl;
+            cout << "Doctor Address:" << cur[3] << endl;
             return;
         }
     }
